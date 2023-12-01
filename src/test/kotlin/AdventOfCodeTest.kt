@@ -1,18 +1,17 @@
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import java.net.URI
 import java.util.stream.Stream
 import kotlin.test.assertEquals
 
 class AdventOfCodeTest {
     private val testCases = listOf(
         TestCase(Day0, 3, 6, 6, 21),
-        TestCase(Day0, 3, 6, 6, 24),
+        TestCase(Day1, 0, 0, 0, 0),
     )
 
     @TestFactory
-    fun days() = testCases.map { testCase ->
+    fun `All Days`() = testCases.map { testCase ->
         DynamicContainer.dynamicContainer(
             testCase.name,
             Stream.of(

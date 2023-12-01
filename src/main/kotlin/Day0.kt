@@ -1,4 +1,4 @@
-data object Day0 : Day(0) {
+object Day0 : Day(0) {
     override fun solvePart1(input: List<String>):Int {
         val filtered = input.filter { it.isNotBlank() }
         return filtered.size
