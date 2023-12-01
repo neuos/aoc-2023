@@ -1,36 +1,27 @@
+import org.junit.jupiter.api.Assumptions
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import java.util.stream.Stream
 import kotlin.test.assertEquals
 
 class AdventOfCodeTest {
-    private val testCases = listOf(
-        TestCase(Day0, 3, 6, 6, 21),
-        TestCase(Day01, 142, 54990, 281, 54473),
-    )
+    companion object {
+        private val days = Day::class.sealedSubclasses.map { it.objectInstance!! }.sorted()
+        private fun testcase(name: String, expected: Any?, actual: Any) = DynamicTest.dynamicTest(name) {
+            Assumptions.assumeFalse { expected == null }
+            assertEquals(expected, actual)
+        }
+    }
 
     @TestFactory
-    fun `All Days`() = testCases.map { testCase ->
+    fun `All Days`() = days.map {
         DynamicContainer.dynamicContainer(
-            testCase.name,
-            Stream.of(
-                DynamicTest.dynamicTest("Part 1 example") {
-                    assertEquals(testCase.part1Example, testCase.day.part1Example())
-                },
-                DynamicTest.dynamicTest("Part 1") {
-                    assertEquals(testCase.part1, testCase.day.part1())
-                },
-                DynamicTest.dynamicTest("Part 2 example") {
-                    assertEquals(testCase.part2Example, testCase.day.part2Example())
-                },
-                DynamicTest.dynamicTest("Part 2") {
-                    assertEquals(testCase.part2, testCase.day.part2())
-                })
+            it.toString(), listOf(
+                testcase("Part 1 example", it.expected.part1Example, it.part1Example()),
+                testcase("Part 1", it.expected.part1, it.part1()),
+                testcase("Part 2 example", it.expected.part2Example, it.part2Example()),
+                testcase("Part 2", it.expected.part2, it.part2())
+            )
         )
-    }.toTypedArray()
-}
-
-data class TestCase(val day: Day, val part1Example: Any, val part1: Any, val part2Example: Any, val part2: Any) {
-    val name: String = day.toString()
+    }
 }

@@ -1,4 +1,5 @@
 object Day01 : Day(1) {
+    override val expected = DayResult(142, 54990, 281, 54473)
     override fun solvePart1(input: Sequence<String>) = solve(input) { line ->
         line.filter { it.isDigit() }.toList()
     }

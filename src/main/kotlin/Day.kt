@@ -1,6 +1,6 @@
 import java.io.FileNotFoundException
 
-abstract class Day(private val dayNumber: Int) {
+sealed class Day(private val dayNumber: Int) : Comparable<Day> {
     fun part1Example(): Any = solvePart1(getExampleInput(1))
     fun part1(): Any = solvePart1(getInput())
     fun part2Example(): Any = solvePart2(getExampleInput(2))
@@ -14,4 +14,10 @@ abstract class Day(private val dayNumber: Int) {
     protected abstract fun solvePart1(input: Sequence<String>): Any
     protected abstract fun solvePart2(input: Sequence<String>): Any
     override fun toString() = "Day $dayNumber"
+    override fun compareTo(other: Day) = dayNumber.compareTo(other.dayNumber)
+    abstract val expected: DayResult
 }
+
+data class DayResult(
+    val part1Example: Any? = null, val part1: Any? = null, val part2Example: Any? = null, val part2: Any? = null
+)
