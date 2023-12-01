@@ -17,6 +17,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testImplementation(kotlin("reflect"))
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.test {
