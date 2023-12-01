@@ -1,4 +1,4 @@
-object Day1: Day(1) {
+object Day01: Day(1) {
     override fun solvePart1(input: List<String>): Any {
         TODO("Not yet implemented")
     }
