@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 class AdventOfCodeTest {
     private val testCases = listOf(
         TestCase(Day0, 3, 6, 6, 21),
-        TestCase(Day01, 0, 0, 0, 0),
+        TestCase(Day01, 142, 54990, 281, 54473),
     )
 
     @TestFactory

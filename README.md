@@ -4,4 +4,5 @@ Challenges at [https://adventofcode.com/2023](https://adventofcode.com/2023)
 
 Solved Challenges:
 
-- [Day 0](src/main/kotlin/Day0.kt) ⭐⭐️
+- [Day 00](src/main/kotlin/Day0.kt) ⭐⭐️
+- [Day 01](src/main/kotlin/Day01.kt) ⭐⭐️
