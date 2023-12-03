@@ -11,11 +11,11 @@ sealed class Day(private val dayNumber: Int) : Comparable<Day> {
     private fun resource(name: String) =
         this::class.java.getResourceAsStream(name) ?: throw FileNotFoundException("Resource $name not found")
 
+    abstract val expected: DayResult
     protected abstract fun solvePart1(input: Sequence<String>): Any
     protected abstract fun solvePart2(input: Sequence<String>): Any
     override fun toString() = "Day $dayNumber"
     override fun compareTo(other: Day) = dayNumber.compareTo(other.dayNumber)
-    abstract val expected: DayResult
 }
 
 data class DayResult(
