@@ -6,16 +6,23 @@ object Day03 : Day(3) {
         val grid = list.charGrid()
         return list.flatMapIndexed { row, s ->
 
+            s.indexedNumbers()
             val numbers = s.split(Regex("\\D")).filter { it.isNotEmpty() }
             println("row: $row numbers: $numbers")
             var index = 0
             numbers.filter { num ->
+                println("searching for $num in $s starting at $index")
                 index = s.indexOf(num, index)
+                println("found at $index")
                 assert(index >= 0)
                 val range = index..<index + num.length
+                index += num.length
+
                 val adjacent = grid.adjacent(row, range)
                 //    println("row: $row num: $num range: $range adjacent: ${adjacent.filter { it.isSymbol() }.toList()}")
+
                 adjacent.any { it.isSymbol() }
+
             }.map { it.toLong() }.also {
                 println("row: $row taking: $it")
             }
@@ -31,7 +38,18 @@ object Day03 : Day(3) {
 
 }
 
+private fun String.indexedNumbers() {
+    // find all numbers and their start and end index
+    val numbers = split(Regex("\\D")).filter { it.isNotEmpty() }
+    val numberRanges = numbers.map { number ->
+        val start = indexOf(number)
+        val end = start + number.length
+        start..end
+    }
+}
+
 // too low 538335
+
 // too high 539518
 
 private fun <E> List<List<E>>.adjacent(row: Int, columns: IntRange) = sequence<E> {
