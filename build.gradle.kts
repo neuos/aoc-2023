@@ -82,14 +82,10 @@ abstract class InitializeDay : DefaultTask() {
         val directory = inputDir.resolve(day.get().toString())
         if (!directory.exists()) directory.mkdirs()
         downloadInput(directory)
-        createExampleInput(directory)
+        directory.createExampleInput()
     }
 
-    private fun createExampleInput(directory: File) = listOf("example1.txt", "example2.txt").map {
-        directory.resolve(it)
-    }.forEach {
-        it.createNewFile()
-    }
+    private fun File.createExampleInput() = resolve("example.txt").createNewFile()
 
     private fun downloadInput(directory: File) {
         val inputFile = directory.resolve("input.txt")
