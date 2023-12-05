@@ -1,5 +1,5 @@
 object Day05 : Day(5) {
-    override val expected = DayResult(35L, 324724204L, 46L, "TODO")
+    override val expected = DayResult(35L, 324724204L, 46L, 104070862)
     override fun solvePart1(input: Sequence<String>): Long {
         val lines = input.toList()
         val chunked = chunkAt(lines) { it.isBlank() }
@@ -57,10 +57,10 @@ object Day05 : Day(5) {
 
 //        println("seeds: $seedRanges")
         println("reduced: $reduced")
-        val min = reduced.maps.map { it.destinationRange.first + it.offset }
+        val min = reduced.maps.map { it.sourceRange.first to it.destinationRange.first }
         println(min)
-        println(min.min())
-        return min.min()
+        println(min.minBy { it.second })
+        return min.minOf { it.second }
     }
 
     private fun String.parseSeeds() = split(":")[1].split(' ').filter { it.isNotBlank() }.map { it.toLong() }
@@ -77,268 +77,55 @@ object Day05 : Day(5) {
 
 
 private fun combine(source: List<AlmanacMap>, destination: List<AlmanacMap>): List<AlmanacMap> {
-    println("Combining $source with $destination")
-
-    val combined = mutableListOf<AlmanacMap>()
-
-    // 1. add all overlaps
-    val overlapping = source.flatMap { a ->
-        destination.mapNotNull { b ->
-            val overlap = a.destinationRange.overlap(b.sourceRange)
-            if (overlap.isEmpty()) null else
-                AlmanacMap(
-                    sourceStart = overlap.first, length = overlap.length, offset = a.offset + b.offset
-                )
-        }
-    }
-    // 2. add all parts that are missing from source
-    val missingFromSource = destination.flatMap { b ->
-        source.filter { a ->
-            b.sourceRange.endsBefore(a.destinationRange) || b.sourceRange.startsAfter(a.destinationRange)
-        }.map { a ->
-            val overlap = a.destinationRange.overlap(b.sourceRange)
-            val before = a.sourceRange.first..<overlap.first
-            val after = (overlap.last + 1)..a.sourceRange.last
-            listOfNotNull(
-                if (before.isEmpty()) null else AlmanacMap(
-                    sourceStart = before.first, length = before.length, offset = a.offset
-                ),
-                if (after.isEmpty()) null else AlmanacMap(
-                    sourceStart = after.first, length = after.length, offset = a.offset
-                )
-            )
-        }.flatten()
-    }
-    println("overlapping: $overlapping")
-    println("missingFromSource: $missingFromSource")
-    val maps = (overlapping + missingFromSource).sortedBy { it.sourceRange.first }
-    println("Combined: $maps")
-    return maps
-
-
-    val almanacMaps = splitAt(source, destination)
-    println("Split at: $almanacMaps")
-    return almanacMaps
-
-
-    var i = 0
-    var j = 0
-    while (i < source.size && j < destination.size) {
-        val a = source[i]
-        val b = destination[j]
-        val dstA = a.destinationRange
-        val srcB = b.sourceRange
-        println("comparing $a = $dstA and $b = $srcB")
-
-        val overlap = dstA.overlap(srcB)
-        // cases:
-        when {
-            overlap.isEmpty() -> {
-                when {
-                    // a is completely before b -> use a, check next a
-                    dstA.endsBefore(srcB) -> {
-                        combined += a
-                        i++
-                    }
-                    // a is completely after b -> check next b
-                    dstA.startsAfter(srcB) -> {
-                        j++
-                    }
-                }
-            }
-
-            else -> {
-                // potential part before
-
-                val overlapSrc = overlap.first - a.offset..overlap.last - a.offset
-                println("Overlap between $dstA and $srcB: $overlap")
-                println("Overlap in source: $overlapSrc")
-                val before = a.sourceRange.first..<overlapSrc.first
-                if (!before.isEmpty()) {
-                    println("before: $before")
-                    val beforeMap = AlmanacMap(
-                        sourceStart = before.first, length = before.length, offset = a.offset
-                    )
-                    println("beforeMap: $beforeMap")
-                    combined += beforeMap
-                }
-                // and after
-                val after = (overlapSrc.last + 1)..a.sourceRange.last
-                if (!after.isEmpty()) {
-                    println("after: $after")
-                    val afterMap = AlmanacMap(
-                        sourceStart = after.first, length = after.length, offset = a.offset
-                    )
-                    println("afterMap: $afterMap")
-                    combined += afterMap
-                }
-
-                // part in between
-                val between = AlmanacMap(
-                    sourceStart = overlapSrc.first, length = overlap.length, offset = a.offset + b.offset
-                )
-                println("between: $between")
-                println("merged offset: ${a.offset} with ${b.offset} to ${between.offset}")
-                combined += between
-                i++
-            }
-        }
-    }
-    if (i < source.size) {
-        combined += source.drop(i)
-    }
-
-    combined.sortBy { it.sourceRange.start }
-    println("Combined: $combined")
-    return combined
-}
-
-private fun splitAt(source: List<AlmanacMap>, destination: List<AlmanacMap>): List<AlmanacMap> {
-    val edges =
-        (source.map { it.destinationRange }.flatMap { listOf(it.first, it.last) } + destination.map { it.sourceRange }
-            .flatMap { listOf(it.first, it.last) }).sorted().distinct()
-
-    var i = 0
-    var j = 0
-    var result = mutableListOf<AlmanacMap>()
-    do {
-        var a = source[i]
-        var b = destination[j]
-
-
-        if (b.sourceRange.last < a.destinationRange.first) {
-            // b ends before a starts. continue with next b
-            j++
-            continue
-        }
-        if (b.sourceRange.first > a.destinationRange.last) {
-            // b starts after a ends
-            // a has no overlap with b
-            // taking a fully without offset
-            val element = AlmanacMap(
-                sourceStart = a.destinationRange.first,
-                length = (a.destinationRange.first..a.destinationRange.last).length,
-                offset = a.offset
-            )
-            println("no overlap with b: Adding $element")
-            result += element
-            i++
-            continue
-        }
-
-        val start = maxOf(a.destinationRange.first, b.sourceRange.first)
-        val end = minOf(a.destinationRange.last, b.sourceRange.last)
-        if (start > a.destinationRange.first) {
-
-        }
-
-
-    } while (i <= source.size)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    println("edges: $edges")
-    val maps = buildList {
-        for ((left, right) in edges.windowed(2)) {
-//            println("Checking $left..$right")
-            if (i >= source.size) {
-//                println("Reached end of a")
-                break
-            }
-            val a = source[i]
-            val b = destination.getOrNull(j)
-//            println("i=$i, j=$j")
-//            println("a=$a, b=$b")
-
-            val startsInA = left in a.destinationRange.first..<a.destinationRange.last
-            val startsInB = b?.let { left in b.sourceRange.first..<b.sourceRange.last } ?: false
-            if (startsInA && startsInB) {
-                val element = AlmanacMap(
-                    sourceStart = left,
-                    length = (left..right).length,
-                    offset = a.offset + b!!.offset
-                )
-                println("Starts in a and in b: adding $element")
-                add(element)
-            }
-
-            val overlapA = (left..right).overlap(a.destinationRange)
-            val overlapB = b?.let { (left..right).overlap(b.sourceRange) }
-
-            if (left in a.destinationRange) {
-//                println("Overlap with a: $overlapA")
-                if (overlapB == null || overlapB.isEmpty()) {
-//                    println("No overlap with b -> keep old offset")
-                    // block withouth b
-                    // keep old offset
-                    val element = AlmanacMap(sourceStart = left, length = (left..right).length, offset = a.offset)
-//                    println("Adding $element")
-                    add(element)
-                } else {
-//                    println("Overlap with b: $overlapB")
-                    // block with b
-                    // new offset = old offset + b.offset
-                    val element =
-                        AlmanacMap(sourceStart = left, length = (left..right).length, offset = a.offset + b.offset)
-//                    println("Adding $element")
-                    add(element)
-                }
-            } else {
-//                println("No overlap with a")
-            }
-
-            if (right == a.destinationRange.last) {
-                // end of a block
-//                println("End of a block")
-                i++
-            }
-            if (right == b?.sourceRange?.last) {
-                // end of b block
-//                println("End of b block")
-                j++
-            }
-        }
-    }
-    return maps
-
-
-
-
-    source.map { a ->
-        destination.dropWhile {
-            it.sourceRange.endsBefore(a.destinationRange)
-        }.takeWhile {
-            it.sourceRange.startsAfter(a.destinationRange)
-        }.map { b ->
+    return source.flatMap { a ->
+        println("combining $a (${a.destinationRange}) with $destination")
+        val relevant = destination.filter { a.destinationRange.overlaps(it.sourceRange) }
+        println("relevant: $relevant")
+        if (relevant.isEmpty()) return@flatMap listOf(a)
+        val overlapping = relevant.map { b ->
             val overlap = a.destinationRange.overlap(b.sourceRange)
             AlmanacMap(
-                sourceStart = overlap.first, length = overlap.length, offset = a.offset + b.offset
+                sourceStart = overlap.first - a.offset, length = overlap.length, offset = a.offset + b.offset
             )
         }
-    }
+        println("overlapping: $overlapping")
 
+        val without = a.sourceRange.without(overlapping.map { it.sourceRange })
+        println("without: $without")
+        val diff = without.map {
+            AlmanacMap(
+                sourceStart = it.first, length = it.length, offset = a.offset
+            )
+        }
+        println("diff: $diff")
+        val almanacMaps = overlapping + diff
+        println("Combined $a with $relevant to $almanacMaps")
+
+        almanacMaps
+    }.sortedBy { it.sourceRange.first }.also {
+        println("Combined: $it")
+    }.also { maps ->
+        // none of the ranges should overlap
+        maps.forEach { a ->
+            maps.filter { it != a }.forEach { b ->
+                if (a.sourceRange.overlaps(b.sourceRange)) {
+                    error("Overlap: $a and $b")
+                }
+            }
+        }
+    }
 }
+
+private fun LongRange.without(
+    others: List<LongRange>
+): List<LongRange> {
+    var difference = listOf(this)
+    others.forEach { o ->
+        difference = difference.flatMap { it.without(o) }
+    }
+    return difference
+}
+
 
 private fun LongRange.startsAfter(other: LongRange) = first > other.last
 private fun LongRange.endsBefore(other: LongRange) = last < other.first
@@ -348,6 +135,8 @@ private fun LongRange.without(other: LongRange): List<LongRange> {
     val trailing = (other.last + 1)..last
     return listOf(leading, trailing).filter { !it.isEmpty() }
 }
+
+private fun LongRange.overlaps(sourceRange: LongRange) = !overlap(sourceRange).isEmpty()
 
 private fun LongRange.overlap(other: LongRange): LongRange {
     val start = maxOf(first, other.first)
@@ -384,6 +173,9 @@ data class AlmanacMap(private val sourceStart: Long, val length: Long, val offse
 }
 
 fun main() {
+    println((1..9L).without(listOf(1..3L, 5..7L)))
+
+
     println(Day05.part2Example())
 //    println((1..30L).overlap(10L..20))
 //
@@ -402,21 +194,21 @@ fun main() {
 //        AlmanacMap(64, 13, 4),
 //        AlmanacMap(77, 23, -32)
 //    )
-    val source = listOf(
-        AlmanacMap(79, 14, -5)
-    )
-    val destination = listOf(
-        AlmanacMap(64, 13, 4), AlmanacMap(77, 23, -32)
-    )
-    val combined = combine(
-        source, destination
-    )
-    println("source:" + source)
-    println("source destination " + source.map { it.destinationRange })
-
-    println(combined)
-    println("source  82->" + source.map { it.resolve(82) }.firstOrNull { it != null })
-    println("combined82->" + combined.map { it.resolve(82) }.firstOrNull { it != null })
+//        val source = listOf (
+//            AlmanacMap(79, 14, -5)
+//            )
+//    val destination = listOf(
+//        AlmanacMap(64, 13, 4), AlmanacMap(77, 23, -32)
+//    )
+//    val combined = combine(
+//        source, destination
+//    )
+//    println("source:" + source)
+//    println("source destination " + source.map { it.destinationRange })
+//
+//    println(combined)
+//    println("source  82->" + source.map { it.resolve(82) }.firstOrNull { it != null })
+//    println("combined82->" + combined.map { it.resolve(82) }.firstOrNull { it != null })
 //    Combined: [55..58:27, 59..67:31, 79..81:-1, 82..92:-5]
 
 }
