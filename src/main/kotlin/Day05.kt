@@ -1,14 +1,14 @@
 object Day05 : Day(5) {
-    override val expected = DayResult(35, "TODO", "TODO", "TODO")
-    override fun solvePart1(input: Sequence<String>): Int {
+     override val expected = DayResult(35L, "TODO", "TODO", "TODO")
+    override fun solvePart1(input: Sequence<String>): Long {
         val lines = input.toList()
         val chunked = chunkAt(lines) { it.isBlank() }
-        val seeds = chunked[0].single().split(":")[1].split(' ').filter { it.isNotBlank() }.map { it.toInt() }
+        val seeds = chunked[0].single().split(":")[1].split(' ').filter { it.isNotBlank() }.map { it.toLong() }
         println("seeds: $seeds")
         val entries = chunked.drop(1).map {
             val name = it[0].split(":")[0]
             val maps = it.drop(1).map {
-                val (destinationStart, sourceStart, length) = it.split(' ').map { it.toInt() }
+                val (destinationStart, sourceStart, length) = it.split(' ').map { it.toLong() }
                 AlmanacMap(offset = destinationStart - sourceStart, sourceStart = sourceStart, length = length)
             }
             AlmanacEntry(name, maps)
@@ -20,7 +20,7 @@ object Day05 : Day(5) {
         println("reduced: $reduced")
 
         val mapped =  seeds.map {seed->
-            var x: Int = seed
+            var x = seed
             entries.forEach {
              x = it.resolve(x)
             }
@@ -77,25 +77,25 @@ private fun List<AlmanacMap>.combine(other: List<AlmanacMap>): List<AlmanacMap> 
     return combined
 }
 
-private fun IntRange.without(other: IntRange): List<IntRange> {
+private fun LongRange.without(other: LongRange): List<LongRange> {
     val leading = start..<other.first
     val trailing = (other.last + 1)..last
     return listOf(leading, trailing).filter { !it.isEmpty() }
 }
 
-private fun IntRange.overlap(other: IntRange): IntRange? {
+private fun LongRange.overlap(other: LongRange): LongRange? {
     val start = maxOf(start, other.first)
     val end = minOf(last, other.last)
     if (start > end) return null
     return start..end
 }
 
-private val IntRange.length: Int
+private val LongRange.length: Long
     get() = last - first + 1
 
 
 data class AlmanacEntry(val name: String, val maps: List<AlmanacMap>) {
-    fun resolve(value: Int): Int {
+    fun resolve(value: Long): Long {
         val map = maps.firstOrNull { it.sourceRange.contains(value) } ?: return value
         return value + map.offset
     }
@@ -104,7 +104,7 @@ data class AlmanacEntry(val name: String, val maps: List<AlmanacMap>) {
     val to = name.split('-').last()
 }
 
-data class AlmanacMap(val offset: Int, val sourceStart: Int, val length: Int) {
+data class AlmanacMap(val offset: Long, val sourceStart: Long, val length: Long) {
     val sourceRange = sourceStart..<(sourceStart + length)
     fun toFullString(): String {
         return sourceRange.map() { source ->
