@@ -21,6 +21,7 @@ object Day06 : Day(6) {
         return waysToWinMath(time, distance)
     }
 
+    @Suppress("unused") // here for reference
     private fun waysToWinBruteForce(time: Long, distance: Long) = (1..<time).count { v ->
         (v * (time - v)) > distance
     }
@@ -47,14 +48,10 @@ object Day06 : Day(6) {
     /**
      * Returns the next representable floating-point value after this value in direction of positive infinity.
      */
-    fun solveQuadratic(p: Double, q: Double): Pair<Double, Double> {
+    private fun solveQuadratic(p: Double, q: Double): Pair<Double, Double> {
         val root = sqrt((p * p) / 4 - q)
         val lower = -p / 2 - root
         val higher = -p / 2 + root
         return lower to higher
     }
-}
-
-fun main() {
-    println(Day06.solveQuadratic(-30.0, 200.0))
 }
