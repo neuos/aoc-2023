@@ -9,3 +9,4 @@ Solved Challenges:
 - [Day 03](src/main/kotlin/Day03.kt) ⭐⭐️
 - [Day 04](src/main/kotlin/Day04.kt) ⭐⭐️
 - [Day 05](src/main/kotlin/Day05.kt) ⭐⭐️
+- [Day 06](src/main/kotlin/Day06.kt) ⭐⭐️
