@@ -14,14 +14,15 @@ class AdventOfCodeTest {
     }
 
     @TestFactory
-    fun `All Days`() = days.map {
-        DynamicContainer.dynamicContainer(
-            it.toString(), listOf(
-                testcase("Part 1 example", it.expected.part1Example) { it.part1Example() },
-                testcase("Part 1", it.expected.part1) { it.part1() },
-                testcase("Part 2 example", it.expected.part2Example) { it.part2Example() },
-                testcase("Part 2", it.expected.part2) { it.part2() }
-            )
-        )
-    }
+    fun `All Days`() = days.map { it.testContainer() }
+
+    @TestFactory
+    fun Today() = days.last().testContainer()
+
+    private fun Day.testContainer() = DynamicContainer.dynamicContainer(
+        toString(), listOf(testcase("Part 1 example", expected.part1Example) { part1Example() },
+            testcase("Part 1", expected.part1) { part1() },
+            testcase("Part 2 example", expected.part2Example) { part2Example() },
+            testcase("Part 2", expected.part2) { part2() })
+    )
 }
