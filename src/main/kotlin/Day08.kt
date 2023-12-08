@@ -1,5 +1,5 @@
 object Day08 : Day(8) {
-    override val expected = DayResult(2, "TODO", "TODO", "TODO")
+    override val expected = DayResult(2, 13939, 6, "TODO")
     override fun solvePart1(input: Sequence<String>): Any {
         val list = input.toList()
         val instructions = list.first().toCharArray()
@@ -31,7 +31,27 @@ object Day08 : Day(8) {
     }
 
     override fun solvePart2(input: Sequence<String>): Any {
-        return 0
+        val list = input.toList()
+        val instructions = list.first().toCharArray()
+        val nodes = list.drop(1).filter { it.isNotEmpty() }.map { Node.from(it) }.associateBy { it.name }
+
+        var i = 0
+        fun isEnd(node: Node) = node.name.endsWith('Z')
+        var current = nodes.values.filter { it.name.endsWith('A') }
+
+        while (current.any { !isEnd(it) }) {
+            current = current.map { node ->
+                when (val instruction = instructions[i % instructions.size]) {
+                    'L' -> nodes[node.left] ?: error("Unknown node ${node.left}")
+                    'R' -> nodes[node.right] ?: error("Unknown node ${node.right}")
+                    else -> error("Unknown instruction $instruction")
+                }
+            }
+            i++
+        }
+
+        println(i)
+        return i
     }
 }
 
