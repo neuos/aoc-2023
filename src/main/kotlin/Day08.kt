@@ -1,19 +1,41 @@
 object Day08 : Day(8) {
-    override val expected = DayResult(2, 13939, 6L, "TODO")
+    override val expected = DayResult(2, 13939, 6L, 8906539031197L)
     override fun solvePart1(input: Sequence<String>): Any {
+        fun isExit(node: Node) = node.name == "ZZZ"
         val (instructions, nodes) = parseInput(input)
-
-        var i = 0
         var current = nodes["AAA"]!!
-        val end = nodes["ZZZ"]!!
-
-        while (current != end) {
-            current = applyInstruction(nodes, current, instructions[i % instructions.size])
-            i++
+        var steps = 0
+        while (!isExit(current)) {
+            val instruction = instructions[steps % instructions.size]
+            current = applyInstruction(nodes, current, instruction)
+            steps++
         }
+        return steps
+    }
 
-        println(i)
-        return i
+
+    override fun solvePart2(input: Sequence<String>): Any {
+        val (instructions, nodes) = parseInput(input)
+        val startingNodes = nodes.values.filter { it.name.endsWith('A') }
+        val loops = startingNodes.map { findPath(nodes, it, instructions) }
+        val canUseLGM = loops.all { path -> path.loopExits.keys.singleOrNull() == path.loopLength }
+        if (canUseLGM) {
+            // works in actual input, but not in example
+            return loops.map { it.exits.keys.single().toLong() }.reduce { acc, i -> leastCommonMultiple(acc, i) }
+        } else {
+            // brute force solver for example input
+            var ends = loops.map { it.endIndices() }
+            while (true) {
+                val next = ends.map { it.first() }
+                if (next.allEquals()) {
+                    return next.first()
+                }
+                val max = next.max()
+                ends = ends.map { end ->
+                    end.dropWhile { it < max }
+                }
+            }
+        }
     }
 
     private fun applyInstruction(
@@ -24,93 +46,68 @@ object Day08 : Day(8) {
         else -> error("Unknown instruction $instruction")
     }
 
-    override fun solvePart2(input: Sequence<String>): Any {
-        val (instructions, nodes) = parseInput(input)
-
-
-        val startingNodes = nodes.values.filter { it.name.endsWith('A') }
-        val loops = startingNodes.map { findPath(nodes, it, instructions) }
-
-        val canUseLGM = loops.all { path -> path.loopEnds.keys.singleOrNull() == path.loopLength }
-        if (canUseLGM) {
-            return loops.map { it.ends.keys.single().toLong() }.reduce { acc, i -> leastCommonMultiple(acc, i) }
-
-        } else {
-            val ends = loops.map { it.endIndices().asIterable().iterator() }
-            while (true) {
-                val next = ends.map { it.next() }
-//            if (next.first() > 1000) return 0
-                println("next $next")
-                if (next.allEquals()) {
-                    println(next.first())
-                    return next.first()
-                }
-                val max = next.max()
-                ends.filterIndexed { index, _ -> next[index] < max }.forEach { end ->
-                    end.takeWhile { it < max }
-                }
-            }
-        }
-
-
-    }
-
     private fun leastCommonMultiple(a: Long, b: Long) = a * b / greatestCommonDivisor(a, b)
 
     private tailrec fun greatestCommonDivisor(a: Long, b: Long): Long = if (b == 0L) a
     else greatestCommonDivisor(b, a % b)
 
-    private fun <T> Iterator<T>.takeWhile(condition: (T) -> Boolean) {
-        while (condition(next())) {
-        }
-    }
-
     private fun <T> Iterable<T>.allEquals() = firstOrNull()?.let { first -> drop(1).all { it == first } } ?: true
 
-    fun isEnd(node: Node) = node.name.endsWith('Z')
-    fun findPath(nodes: Map<String, Node>, start: Node, instructions: CharArray): Path {
-        var i = 0
-        var current = start
+    private fun findPath(nodes: Map<String, Node>, start: Node, instructions: CharArray): Path {
+        fun isExit(node: Node) = node.name.endsWith('Z')
         val visited = mutableSetOf<Pair<Node, Int>>()
-        val ends = mutableMapOf<Int, Node>()
-
-        while (current to i.mod(instructions.size) !in visited) {
-            if (isEnd(current)) {
-                ends[i] = current
+        val exits = mutableMapOf<Int, Node>()
+        var node = start
+        var steps = 0
+        while (true) {
+            val index = steps % instructions.size
+            val key = node to index
+            if (key in visited) break
+            if (isExit(node)) {
+                exits[steps] = node
             }
 
-            val instruction = instructions[i.mod(instructions.size)]
-            visited.add(current to i.mod(instructions.size))
-            current = applyInstruction(nodes, current, instruction)
-            i++
+            visited.add(key)
+            node = applyInstruction(nodes, node, instructions[index])
+            steps++
         }
 
-        i = i.mod(instructions.size)
         val inLoop = mutableSetOf<Pair<Node, Int>>()
-        while (current to i !in inLoop) {
-            inLoop.add(current to i)
-            current = applyInstruction(nodes, current, instructions[i])
-            i = (i + 1).mod(instructions.size)
+        while (true) {
+            val index = steps % instructions.size
+            val key = node to index
+            if (key in inLoop) break
+            inLoop.add(key)
+            node = applyInstruction(nodes, node, instructions[index])
+            steps++
         }
 
         val loopLength = inLoop.size
         val preLoopLength = visited.size - loopLength
-//        println("visited $visited")
-//        println("inLoop $inLoop")
-        return Path(preLoopLength, loopLength, ends)
+        return Path(preLoopLength, loopLength, exits)
     }
 
-    data class Path(val preLoopLength: Int, val loopLength: Int, val ends: Map<Int, Node>) {
-        val loopEnds = ends.filter { it.key >= preLoopLength }
-        val length = preLoopLength + loopLength
+    data class Path(val preLoopLength: Int, val loopLength: Int, val exits: Map<Int, Node>) {
+        val loopExits = exits.filter { it.key >= preLoopLength }
 
         override fun toString(): String {
-            return "Path(preLoopLength=$preLoopLength, loopLength=$loopLength, ends=$ends, loopEnds=$loopEnds, length=$length)"
+            return "Path(preLoopLength=$preLoopLength, loopLength=$loopLength, ends=$exits, loopEnds=$loopExits)"
         }
 
         fun endIndices() = generateSequence(0L) { it + 1 }.flatMap { i ->
-            ends.keys.map { it + loopLength * i }
+            exits.keys.map { it + loopLength * i }
         }
+    }
+
+    data class Node(val name: String, val left: String, val right: String) {
+        companion object {
+            fun from(line: String): Node {
+                val split = line.split(' ', '=', '(', ',', ')').filter { it.isNotEmpty() }
+                return Node(split[0], split[1], split[2])
+            }
+        }
+
+        override fun toString() = "$name($left, $right)"
     }
 
     private fun parseInput(input: Sequence<String>): Pair<CharArray, Map<String, Node>> {
@@ -121,19 +118,3 @@ object Day08 : Day(8) {
     }
 }
 
-data class Node(val name: String, val left: String, val right: String) {
-    companion object {
-        fun from(line: String): Node {
-            val split = line.split(' ', '=', '(', ',', ')').filter { it.isNotEmpty() }
-            return Node(split[0], split[1], split[2])
-        }
-    }
-
-    override fun toString() = "$name($left, $right)"
-}
-
-fun main() {
-
-    Day08.part2Example()
-    print(Day08.part2())
-}
