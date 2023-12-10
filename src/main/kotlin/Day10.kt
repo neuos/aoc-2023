@@ -1,158 +1,104 @@
 import java.io.FileWriter
 import kotlin.math.ceil
 
+private typealias Grid = List<List<Char>>
+
 object Day10 : Day(10) {
-    override val expected = DayResult(4, 6870, 10, "TODO")
-    override fun solvePart1(input: Sequence<String>): Any {
-        val grid = input.toGrid()
-        val loop = findLoop(grid)
-        println("loop $loop")
+    override val expected = DayResult(4, 6870, 10, 287)
+    override fun solvePart1(input: Sequence<String>): Int {
+        val loop = input.toGrid().findLoop()
         return ceil(loop.size / 2.0).toInt()
     }
 
-
-    // 8301 too high
-    // not 302
-    override fun solvePart2(input: Sequence<String>): Any {
+    override fun solvePart2(input: Sequence<String>): Int {
         val grid = input.toGrid()
-        val loop = findLoop(grid)
+        val loop = grid.findLoop()
         val start = loop.first()
-        val startPipe = getStartPipe(loop)
 
-        println("loop $loop")
         val loopGrid = grid.indices.map { row ->
             grid[row].indices.map { column ->
                 when (val coordinate = Coordinate(row, column)) {
-                    start -> startPipe
+                    start -> getStartPipe(loop)
                     in loop -> grid[coordinate]
                     else -> ' '
                 }
             }
         }
-        loopGrid.forEach { println(it.joinToString("")) }
-        loopGrid.toPicture()
+        return loopGrid.findEnclosed(loop)
+    }
 
-        return grid.coordinates().count { isEnclosed(loopGrid, loop, it) }
+    private fun Grid.findLoop(): List<Coordinate> {
+        val start = coordinates().first { this[it] == 'S' }
+        var current = adjacent(start).first { c -> areConnected(start, c) }
+        return buildList {
+            add(start)
+            while (current != start) {
+                val next = next(current, last())
+                add(current)
+                current = next
+            }
+        }
+    }
+
+    private fun Grid.next(current: Coordinate, previous: Coordinate) = when (this[current]) {
+        '|' -> if (current.isAboveOf(previous)) current.up() else current.down()
+        '-' -> if (current.isLeftOf(previous)) current.left() else current.right()
+        'L' -> if (current.isBelowOf(previous)) current.right() else current.up()
+        'J' -> if (current.isBelowOf(previous)) current.left() else current.up()
+        '7' -> if (current.isAboveOf(previous)) current.left() else current.down()
+        'F' -> if (current.isAboveOf(previous)) current.right() else current.down()
+        else -> error("not a pipe ${this[current]} at $current, previous: $previous '${this[previous]}'")
+    }
+
+
+    private fun Grid.findEnclosed(loop: List<Coordinate>): Int {
+        val isInside = map { row ->
+            var inside = false
+            var corner: Char? = null
+            row.map { c ->
+                if (c == '|') inside = !inside
+                else if (c in setOf('L', '7', 'F', 'J')) {
+                    if (corner == 'L' && c == '7') inside = !inside
+                    else if (corner == 'F' && c == 'J') inside = !inside
+                    corner = c
+                }
+                inside
+            }
+        }
+        val loopSet = loop.toSet()
+        return coordinates().filter { it !in loopSet }.count { isInside[it] }
     }
 
     private fun getStartPipe(loop: List<Coordinate>): Char {
-        val last = loop.last()
-        val first = loop[1]
         val start = loop.first()
-        return if (first.isAboveOf(start) || last.isAboveOf(start)) {
-            if (first.isBelowOf(start) || last.isBelowOf(start)) {
-                '|'
-            } else if (first.isLeftOf(start) || last.isLeftOf(start)) {
-                'J'
-            } else if (first.isRightOf(start) || last.isRightOf(start)) {
-                'L'
-            } else error("unknown start")
-        } else if (first.isBelowOf(start) || last.isBelowOf(start)) {
-            if (first.isLeftOf(start) || last.isLeftOf(start)) {
-                '7'
-            } else if (first.isRightOf(start) || last.isRightOf(start)) {
-                'F'
-            } else error("unknown start")
-        } else if (first.isLeftOf(start) || last.isLeftOf(start)) {
-            if (first.isRightOf(start) || last.isRightOf(start)) {
-                '-'
-            } else error("unknown start")
-        } else if (first.isRightOf(start) || last.isRightOf(start)) {
-            error("unknown start")
-        } else error("unknown start")
-    }
+        val (a, b) = listOf(loop[1], loop.last()).sorted()
+        when {
+            a.isAboveOf(start) -> when {
+                b.isBelowOf(start) -> return '|'
+                b.isLeftOf(start) -> return 'J'
+                b.isRightOf(start) -> return 'L'
+            }
 
-    private fun isEnclosed(grid: Grid, loop: List<Coordinate>, coordinate: Coordinate): Boolean {
-        if (coordinate in loop) return false
+            b.isBelowOf(start) -> when {
+                a.isLeftOf(start) -> return '7'
+                a.isRightOf(start) -> return 'F'
+            }
 
-        val leftRange = (0..coordinate.y).map { Coordinate(coordinate.x, it) }
-        val leftChars = leftRange.map { grid[it] }
-        val straight = leftChars.count { it == '|' }
-
-        var count = 0
-        var corner = ' '
-        leftChars.forEach { c ->
-            if (c == '|') count++
-            else if (c in setOf('L', '7', 'F', 'J')) {
-                if (corner == 'L' && c == '7') count++
-                else if (corner == 'F' && c == 'J') count++
-                corner = c
+            a.isLeftOf(start) -> when {
+                b.isRightOf(start) -> return '-'
             }
         }
-        val enclosed = count % 2 == 1
-        if (enclosed) println("enclosed $coordinate count $count")
-        return enclosed
-
-
-//        val pipesLeft = leftRange.count { Coordinate(coordinate.x, it) in loop }
-
-        val pipesRight = (coordinate.y..<grid[coordinate.x].size).count { Coordinate(coordinate.x, it) in loop }
-
-        val pipesAbove = (0..coordinate.x).count { Coordinate(it, coordinate.y) in loop }
-
-        val pipesBelow = (coordinate.x..<grid.size).count { Coordinate(it, coordinate.y) in loop }
-
-//        val enclosed = pipesLeft % 2 == 1 && pipesRight % 2 == 1 && pipesAbove % 2 == 1 && pipesBelow % 2 == 1
-//        if (enclosed) println("enclosed $coordinate")
-//        return enclosed
-        return false
+        error("Case not covered for $a - $start - $b")
     }
 
     private fun Sequence<String>.toGrid(): Grid = map { line -> line.toCharArray().toList() }.toList()
 
-
-    private fun findLoop(grid: Grid): MutableList<Coordinate> {
-
-        val start = grid.flatMapIndexed { row, line ->
-            line.mapIndexedNotNull { column, c ->
-                if (c == 'S') Coordinate(
-                    row, column
-                ) else null
-            }
-        }.first()
-
-        val connected = grid.adjacent(start).filter { c -> grid.areConnected(start, c) }
-        println("connected $connected")
-        val (first, last) = connected
-        println("first $first")
-        println("last $last")
-
-        val loop = mutableListOf(start)
-        var current = first
-        var previous = start
-        while (current != start) {
-//            println("current $current")
-//            println("previous $previous")
-            loop += current
-            val next = grid.next(current, previous)
-            previous = current
-            current = next
-        }
-        return loop
-    }
-
-
-    /**
-     *  | is a vertical pipe connecting north and south.
-     *  - is a horizontal pipe connecting east and west.
-     *  L is a 90-degree bend connecting north and east.
-     *  J is a 90-degree bend connecting north and west.
-     *  7 is a 90-degree bend connecting south and west.
-     *  F is a 90-degree bend connecting south and east.
-     */
-    private fun Grid.areConnected(a: Coordinate, b: Coordinate): Boolean {
-        val connectsUp = setOf('|', 'L', 'J', 'S')
-        val connectsDown = setOf('|', '7', 'F', 'S')
-        val connectsLeft = setOf('-', 'J', '7', 'S')
-        val connectsRight = setOf('-', 'L', 'F', 'S')
-
-        return when {
-            a.isAboveOf(b) -> this[a] in connectsDown && this[b] in connectsUp
-            a.isBelowOf(b) -> this[a] in connectsUp && this[b] in connectsDown
-            a.isLeftOf(b) -> this[a] in connectsRight && this[b] in connectsLeft
-            a.isRightOf(b) -> this[a] in connectsLeft && this[b] in connectsRight
-            else -> false.also { println("not adjacent $a $b") }
-        }
+    private fun Grid.areConnected(start: Coordinate, next: Coordinate) = when {
+        start.isAboveOf(next) -> this[next] in setOf('|', 'L', 'J', 'S')
+        start.isBelowOf(next) -> this[next] in setOf('|', '7', 'F', 'S')
+        start.isLeftOf(next) -> this[next] in setOf('-', 'J', '7', 'S')
+        start.isRightOf(next) -> this[next] in setOf('-', 'L', 'F', 'S')
+        else -> false
     }
 
     private fun Grid.coordinates(): Sequence<Coordinate> = sequence {
@@ -163,8 +109,8 @@ object Day10 : Day(10) {
         }
     }
 
-
-    data class Coordinate(val x: Int, val y: Int) {
+    data class Coordinate(val x: Int, val y: Int) : Comparable<Coordinate> {
+        override fun compareTo(other: Coordinate) = compareValuesBy(this, other, Coordinate::x, Coordinate::y)
         override fun toString() = "($x, $y)"
         fun isAboveOf(other: Coordinate) = equals(other.up())
         fun isBelowOf(other: Coordinate) = equals(other.down())
@@ -177,7 +123,7 @@ object Day10 : Day(10) {
         fun right() = copy(y = y + 1)
     }
 
-    private operator fun Grid.get(other: Coordinate) = get(other.x)[other.y]
+    private operator fun <T> List<List<T>>.get(other: Coordinate) = get(other.x)[other.y]
 
     private fun Grid.adjacent(coordinate: Coordinate) = listOf(
         coordinate.left(), coordinate.right(), coordinate.up(), coordinate.down()
@@ -185,28 +131,6 @@ object Day10 : Day(10) {
 
     private fun Grid.contains(coordinate: Coordinate) =
         coordinate.x in indices && coordinate.y in get(coordinate.x).indices
-
-    private fun Grid.next(current: Coordinate, previous: Coordinate): Coordinate {
-        val startChar = this[current]
-//        println("finding next from '$startChar' at $current, previous: $previous")
-        val error = {
-            error(
-                "not a pipe $startChar at $current, previous: $previous '${this[previous]}'"
-            )
-        }
-        val next = when (startChar) {
-            '|' -> if (current.isAboveOf(previous)) current.up() else if (current.isBelowOf(previous)) current.down() else error()
-            '-' -> if (current.isLeftOf(previous)) current.left() else if (current.isRightOf(previous)) current.right() else error()
-            'L' -> if (current.isBelowOf(previous)) current.right() else if (current.isLeftOf(previous)) current.up() else error()
-            'J' -> if (current.isBelowOf(previous)) current.left() else if (current.isRightOf(previous)) current.up() else error()
-            '7' -> if (current.isAboveOf(previous)) current.left() else if (current.isRightOf(previous)) current.down() else error()
-            'F' -> if (current.isAboveOf(previous)) current.right() else if (current.isLeftOf(previous)) current.down() else error()
-
-            else -> error()
-        }
-//        println("moving from $current = '${this[current]}' to $next")
-        return next
-    }
 
 }
 
@@ -252,32 +176,24 @@ private fun Grid.toPicture() {
         }
     }.map { it.toTypedArray() }.toTypedArray()
 
+    fun createPBM(imageData: Array<Array<Int>>) {
+
+        val height = imageData.size
+        val width = imageData[0].size
+
+        val content = buildString {
+            appendLine("P1")
+            appendLine("$width $height")
+            imageData.forEach { row ->
+                appendLine(row.joinToString(" "))
+            }
+        }
+
+        val outputFile = FileWriter("output.pbm")
+        outputFile.write(content)
+        outputFile.close()
+
+    }
     createPBM(imageData)
 }
 
-fun createPBM(imageData: Array<Array<Int>>) {
-
-    val height = imageData.size
-    val width = imageData[0].size
-
-    val content = buildString {
-        appendLine("P1")
-        appendLine("$width $height")
-        imageData.forEach { row ->
-            appendLine(row.joinToString(" "))
-        }
-    }
-
-    val outputFile = FileWriter("output.pbm")
-    outputFile.write(content)
-    outputFile.close()
-
-}
-
-private typealias Grid = List<List<Char>>
-
-
-fun main() {
-//    println(Day10.part2Example())
-    println(Day10.part2())
-}
