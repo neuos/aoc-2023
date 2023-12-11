@@ -109,7 +109,7 @@ object Day10 : Day(10) {
         }
     }
 
-    data class Coordinate(val x: Int, val y: Int) : Comparable<Coordinate> {
+    private data class Coordinate(val x: Int, val y: Int) : Comparable<Coordinate> {
         override fun compareTo(other: Coordinate) = compareValuesBy(this, other, Coordinate::x, Coordinate::y)
         override fun toString() = "($x, $y)"
         fun isAboveOf(other: Coordinate) = equals(other.up())
