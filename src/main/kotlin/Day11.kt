@@ -1,7 +1,9 @@
+import kotlin.math.abs
+
 private const val GALAXY = '#'
 
 object Day11 : Day(11) {
-    override val expected = DayResult("TODO", "TODO", "TODO", "TODO")
+    override val expected = DayResult(374, "TODO", "TODO", "TODO")
     override fun solvePart1(input: Sequence<String>): Any {
         val grid = input.map { it.toList() }.toList()
         val noGalaxyRows = grid.map { row -> row.all { it != GALAXY } }
@@ -22,18 +24,20 @@ object Day11 : Day(11) {
         println("columnOffsets: $columnOffsets")
         println("columnIndices: $columnIndices")
 
-        val coordinates = grid.flatMapIndexed{ x, row ->
+        val coordinates = grid.flatMapIndexed { x, row ->
             row.mapIndexedNotNull { y, c ->
-                if(c == GALAXY) Coordinate(rowIndices[x], columnIndices[y]) else null
+                if (c == GALAXY) Coordinate(rowIndices[x], columnIndices[y]) else null
             }
         }
 
         println("coordinates: $coordinates")
 
-
-
-        return 0
+        return coordinates.pairs().map { (a, b) ->
+            manhattanDistance(a, b)
+        }.reduce(Int::plus)
     }
+
+    private fun manhattanDistance(a: Coordinate, b: Coordinate) = abs(a.x - b.x) + abs(a.y - b.y)
 
     override fun solvePart2(input: Sequence<String>): Any {
         return 0
@@ -42,6 +46,12 @@ object Day11 : Day(11) {
     private data class Coordinate(val x: Int, val y: Int) : Comparable<Coordinate> {
         override fun compareTo(other: Coordinate) = compareValuesBy(this, other, Coordinate::x, Coordinate::y)
         override fun toString() = "($x, $y)"
+    }
+}
+
+private fun <E> List<E>.pairs(): List<Pair<E, E>> = indices.flatMap { i ->
+    (i + 1..<size).map { j ->
+        Pair(this[i], this[j])
     }
 }
 
