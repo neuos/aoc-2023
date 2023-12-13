@@ -1,5 +1,5 @@
 object Day12 : Day(12) {
-    override val expected = DayResult(21, "TODO", "TODO", "TODO")
+    override val expected = DayResult(21, 8270, "TODO", "TODO")
     override fun solvePart1(input: Sequence<String>): Any {
         return input.sumOf { line ->
             line.findArrangements().toLong()
