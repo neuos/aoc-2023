@@ -23,14 +23,8 @@ private fun String.findArrangements(): Int {
         }
     }
     val valid = arrangements.filter { contiguousLengths(it) == requiredLengths }
-    println(this)
-    valid.forEach {
-        println(it.joinToString(""))
-    }
-    println()
-
-
     val correct = valid.count()
+    println("$this: $correct")
     return correct
 }
 
