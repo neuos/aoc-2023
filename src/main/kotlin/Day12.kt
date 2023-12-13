@@ -1,13 +1,13 @@
 object Day12 : Day(12) {
     override val expected = DayResult(21, 8270, "TODO", "TODO")
-    override fun solvePart1(input: Sequence<String>): Any {
-        return input.sumOf { line ->
-            line.findArrangements().toLong()
-        }
+    override fun solvePart1(input: Sequence<String>) = input.sumOf { line ->
+        line.findArrangements()
     }
 
-    override fun solvePart2(input: Sequence<String>): Any {
-        return 0
+    override fun solvePart2(input: Sequence<String>) = input.sumOf { line ->
+        val (springs, lengthString) = line.split(" ")
+        val unfolded = "$springs?".repeat(5).dropLast(1) + " " + "$lengthString,".repeat(5).dropLast(1)
+        unfolded.findArrangements().toLong()
     }
 }
 
