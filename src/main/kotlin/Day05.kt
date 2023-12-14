@@ -37,13 +37,7 @@ object Day05 : Day(5) {
         return seeds to entries
     }
 
-    private fun <T> List<T>.chunkAt(condition: (T) -> Boolean): List<List<T>> = flatMapIndexed { index, x ->
-        when {
-            index == 0 || index == lastIndex -> listOf(index)
-            condition(x) -> listOf(index - 1, index + 1)
-            else -> emptyList()
-        }
-    }.chunked(size = 2) { (from, to) -> slice(from..to) }
+
 
     private object RangeExtensions {
         fun LongRange.without(others: List<LongRange>): List<LongRange> =
@@ -128,3 +122,10 @@ object Day05 : Day(5) {
 }
 
 
+fun <T> List<T>.chunkAt(condition: (T) -> Boolean): List<List<T>> = flatMapIndexed { index, x ->
+    when {
+        index == 0 || index == lastIndex -> listOf(index)
+        condition(x) -> listOf(index - 1, index + 1)
+        else -> emptyList()
+    }
+}.chunked(size = 2) { (from, to) -> slice(from..to) }
