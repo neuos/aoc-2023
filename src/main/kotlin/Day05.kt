@@ -1,7 +1,7 @@
-import Day05.RangeExtensions.length
-import Day05.RangeExtensions.overlap
-import Day05.RangeExtensions.overlaps
-import Day05.RangeExtensions.without
+import RangeExtensions.length
+import RangeExtensions.overlap
+import RangeExtensions.overlaps
+import RangeExtensions.without
 
 object Day05 : Day(5) {
     override val expected = DayResult(35L, 324724204L, 46L, 104070862L)
@@ -35,30 +35,6 @@ object Day05 : Day(5) {
             AlmanacEntry.fromLines(entry)
         }
         return seeds to entries
-    }
-
-
-
-    private object RangeExtensions {
-        fun LongRange.without(others: List<LongRange>): List<LongRange> =
-            others.fold(listOf(this)) { difference, range ->
-                difference.flatMap { it.without(range) }
-            }
-
-        fun LongRange.without(other: LongRange): List<LongRange> {
-            val leading = start..<other.first
-            val trailing = (other.last + 1)..last
-            return listOf(leading, trailing).filter { !it.isEmpty() }
-        }
-
-        fun LongRange.overlaps(sourceRange: LongRange) = !overlap(sourceRange).isEmpty()
-        fun LongRange.overlap(other: LongRange): LongRange {
-            val start = maxOf(first, other.first)
-            val end = minOf(last, other.last)
-            return start..end
-        }
-
-        val LongRange.length: Long get() = last - first + 1
     }
 
 
@@ -121,11 +97,3 @@ object Day05 : Day(5) {
     }
 }
 
-
-fun <T> List<T>.chunkAt(condition: (T) -> Boolean): List<List<T>> = flatMapIndexed { index, x ->
-    when {
-        index == 0 || index == lastIndex -> listOf(index)
-        condition(x) -> listOf(index - 1, index + 1)
-        else -> emptyList()
-    }
-}.chunked(size = 2) { (from, to) -> slice(from..to) }

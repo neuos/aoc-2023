@@ -40,12 +40,4 @@ object Day12 : Day(12) {
                 else -> error("Invalid char ${springs.getOrNull(i)}")
             }
         }(Args(groups))
-
-
-    private fun <E> List<E>.repeat(count: Int) = (1..count).flatMap { this }
-}
-
-class CachedRecursion<Args, Res>(private val function: (rec: CachedRecursion<Args, Res>, Args) -> Res) : (Args) -> Res {
-    private val cache: MutableMap<Args, Res> = mutableMapOf()
-    override operator fun invoke(args: Args) = cache.getOrPut(args) { function(this, args) }
 }

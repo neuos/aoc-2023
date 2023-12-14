@@ -5,7 +5,7 @@ object Day14 : Day(14) {
     override fun solvePart2(input: Sequence<String>): Int {
         var grid = input.toGrid().rotateAnticlockwise()
 
-        val seen = mutableMapOf<Grid, Int>()
+        val seen = mutableMapOf<CharGrid, Int>()
         while (grid !in seen) {
             seen[grid] = seen.size
             repeat(4) {
@@ -21,27 +21,17 @@ object Day14 : Day(14) {
         return resultGrid.weight()
     }
 
-    private fun Grid.weight() = sumOf {
+    private fun CharGrid.weight() = sumOf {
         it.mapIndexed { index, c ->
             if (c == 'O') it.size - index else 0
         }.sum()
     }
 
-    private fun Grid.tiltGridLeft() = map { it.tiltLineLeft() }
+    private fun CharGrid.tiltGridLeft() = map { it.tiltLineLeft() }
     private fun List<Char>.tiltLineLeft() = joinToString("").split("#").joinToString("#") {
         it.toList().sortedDescending().joinToString("")
     }.toList()
 
 
-    private fun <E> List<List<E>>.rotateAnticlockwise() = this.indices.map { i ->
-        this.indices.map { j ->
-            this[j][i]
-        }
-    }.reversed()
 
-    private fun <E> List<List<E>>.rotateClockwise() = this.indices.map { i ->
-        this.indices.map { j ->
-            this[j][i]
-        }.reversed()
-    }
 }

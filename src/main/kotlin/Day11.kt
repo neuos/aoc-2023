@@ -1,12 +1,9 @@
-import kotlin.math.abs
-
 private const val GALAXY = '#'
 
 object Day11 : Day(11) {
     override val expected = DayResult(374L, 10289334L, 82000210L, 649862989626)
     override fun solvePart1(input: Sequence<String>) = findDistances(input, 2L)
     override fun solvePart2(input: Sequence<String>) = findDistances(input, 1000000L)
-    private fun manhattanDistance(a: Coordinate, b: Coordinate) = abs(a.x - b.x) + abs(a.y - b.y)
     private fun findDistances(input: Sequence<String>, age: Long): Long {
         val grid = input.map { it.toList() }.toList()
         val expandingRows = grid.map { row -> row.all { it != GALAXY } }
@@ -28,17 +25,6 @@ object Day11 : Day(11) {
         return galaxies.pairs().sumOf { (a, b) ->
             manhattanDistance(a, b)
         }
-    }
-
-    private data class Coordinate(val x: Long, val y: Long) : Comparable<Coordinate> {
-        override fun compareTo(other: Coordinate) = compareValuesBy(this, other, Coordinate::x, Coordinate::y)
-        override fun toString() = "($x, $y)"
-    }
-}
-
-private fun <E> List<E>.pairs(): List<Pair<E, E>> = indices.flatMap { i ->
-    (i + 1..<size).map { j ->
-        Pair(this[i], this[j])
     }
 }
 

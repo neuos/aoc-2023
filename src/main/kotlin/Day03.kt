@@ -1,5 +1,3 @@
-private typealias Coordinate = Pair<Int, Int>
-
 object Day03 : Day(3) {
     override val expected = DayResult(4361, 539433, 467835, 75847567)
 
@@ -18,8 +16,8 @@ object Day03 : Day(3) {
         val grid = lines.charGrid()
         return lines.flatMapIndexed { row, rowString ->
             rowString.findNumbers().map { (num, range) ->
-                grid.adjacentIndices(row, range).filter { (y, x) ->
-                    grid[y][x].isGear()
+                grid.adjacentIndices(row, range).filter {
+                    grid[it].isGear()
                 }.associateWith { _ -> listOf(num.toInt()) }
             }
         }.reduce { map1, map2 ->
@@ -28,26 +26,8 @@ object Day03 : Day(3) {
     }
 }
 
-/**
- * Combine two maps, if a key is in both maps, the values are merged with the merge function
- */
-private fun <K, V> Map<K, V>.combine(other: Map<K, V>, merge: (V, V) -> V): Map<K, V> {
-    val allKeys = this.keys + other.keys
-    return allKeys.associateWith { key ->
-        val a = this[key]
-        val b = other[key]
-        when {
-            a == null -> b!!
-            b == null -> a
-            else -> merge(a, b)
-        }
-    }
-}
-
-
 private fun Char.isSymbol(): Boolean = !equals('.') and !isDigit()
 private fun Char.isGear() = equals('*')
-private fun Iterable<String>.charGrid() = toList().map { it.toList() }
 
 /**
  * Find all numbers in a string and return them with their start and end index
@@ -72,16 +52,14 @@ private fun String.findNumbers(): List<Pair<String, IntRange>> {
 private fun <E> List<List<E>>.adjacentIndices(row: Int, range: IntRange): List<Coordinate> =
     (row - 1..row + 1).flatMap { r ->
         (range.first - 1..range.last + 1).map { c ->
-            r to c
+            Coordinate(r, c)
         }.filter { (r, c) ->
-            r in indices && c in this[row].indices && !(r == row && c in range)
+            r in indices && c in this[row].indices && !(r.toInt() == row && c in range)
         }
     }
 
 /**
  * Find all adjacent elements of partial row
  */
-private fun <E> List<List<E>>.adjacent(row: Int, columns: IntRange) = adjacentIndices(row, columns).map { (r, c) ->
-    this[r][c]
-}
+private fun <E> List<List<E>>.adjacent(row: Int, columns: IntRange) = adjacentIndices(row, columns).map { this[it] }
 

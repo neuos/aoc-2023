@@ -46,12 +46,6 @@ object Day08 : Day(8) {
         else -> error("Unknown instruction $instruction")
     }
 
-    private fun leastCommonMultiple(a: Long, b: Long) = a * b / greatestCommonDivisor(a, b)
-
-    private tailrec fun greatestCommonDivisor(a: Long, b: Long): Long = if (b == 0L) a
-    else greatestCommonDivisor(b, a % b)
-
-    private fun <T> Iterable<T>.allEquals() = firstOrNull()?.let { first -> drop(1).all { it == first } } ?: true
 
     private fun findPath(nodes: Map<String, Node>, start: Node, instructions: CharArray): Path {
         fun isExit(node: Node) = node.name.endsWith('Z')

@@ -34,24 +34,4 @@ object Day06 : Day(6) {
         // if a solution is an integer, it does not win, but draws
         return higher.nextDownInt() - lower.nextUpInt() + 1
     }
-
-    /**
-     * Returns the Int value nearest to this value in direction of positive infinity.
-     */
-    private fun Double.nextUpInt() = ceil(this).let { if (it == this) it + 1 else it }.toInt()
-
-    /**
-     * Returns the Int value nearest to this value in direction of negative infinity.
-     */
-    private fun Double.nextDownInt() = floor(this).let { if (it == this) it - 1 else it }.toInt()
-
-    /**
-     * Returns the next representable floating-point value after this value in direction of positive infinity.
-     */
-    private fun solveQuadratic(p: Double, q: Double): Pair<Double, Double> {
-        val root = sqrt((p * p) / 4 - q)
-        val lower = -p / 2 - root
-        val higher = -p / 2 + root
-        return lower to higher
-    }
 }

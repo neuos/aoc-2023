@@ -1,8 +1,6 @@
 import java.io.FileWriter
 import kotlin.math.ceil
 
-typealias Grid = List<List<Char>>
-
 object Day10 : Day(10) {
     override val expected = DayResult(4, 6870, 10, 287)
     override fun solvePart1(input: Sequence<String>): Int {
@@ -27,7 +25,7 @@ object Day10 : Day(10) {
         return loopGrid.findEnclosed(loop)
     }
 
-    private fun Grid.findLoop(): List<Coordinate> {
+    private fun CharGrid.findLoop(): List<Coordinate> {
         val start = coordinates().first { this[it] == 'S' }
         var current = adjacent(start).first { c -> areConnected(start, c) }
         return buildList {
@@ -40,7 +38,7 @@ object Day10 : Day(10) {
         }
     }
 
-    private fun Grid.next(current: Coordinate, previous: Coordinate) = when (this[current]) {
+    private fun CharGrid.next(current: Coordinate, previous: Coordinate) = when (this[current]) {
         '|' -> if (current.isAboveOf(previous)) current.up() else current.down()
         '-' -> if (current.isLeftOf(previous)) current.left() else current.right()
         'L' -> if (current.isBelowOf(previous)) current.right() else current.up()
@@ -51,7 +49,7 @@ object Day10 : Day(10) {
     }
 
 
-    private fun Grid.findEnclosed(loop: List<Coordinate>): Int {
+    private fun CharGrid.findEnclosed(loop: List<Coordinate>): Int {
         val isInside = map { row ->
             var inside = false
             var corner: Char? = null
@@ -92,7 +90,7 @@ object Day10 : Day(10) {
     }
 
 
-    private fun Grid.areConnected(start: Coordinate, next: Coordinate) = when {
+    private fun CharGrid.areConnected(start: Coordinate, next: Coordinate) = when {
         start.isAboveOf(next) -> this[next] in setOf('|', 'L', 'J', 'S')
         start.isBelowOf(next) -> this[next] in setOf('|', '7', 'F', 'S')
         start.isLeftOf(next) -> this[next] in setOf('-', 'J', '7', 'S')
@@ -100,40 +98,12 @@ object Day10 : Day(10) {
         else -> false
     }
 
-    private fun Grid.coordinates(): Sequence<Coordinate> = sequence {
-        for (x in indices) {
-            for (y in get(x).indices) {
-                yield(Coordinate(x, y))
-            }
-        }
-    }
 
-    private data class Coordinate(val x: Int, val y: Int) : Comparable<Coordinate> {
-        override fun compareTo(other: Coordinate) = compareValuesBy(this, other, Coordinate::x, Coordinate::y)
-        override fun toString() = "($x, $y)"
-        fun isAboveOf(other: Coordinate) = equals(other.up())
-        fun isBelowOf(other: Coordinate) = equals(other.down())
-        fun isLeftOf(other: Coordinate) = equals(other.left())
-        fun isRightOf(other: Coordinate) = equals(other.right())
 
-        fun up() = copy(x = x - 1)
-        fun down() = copy(x = x + 1)
-        fun left() = copy(y = y - 1)
-        fun right() = copy(y = y + 1)
-    }
-
-    private operator fun <T> List<List<T>>.get(other: Coordinate) = get(other.x)[other.y]
-
-    private fun Grid.adjacent(coordinate: Coordinate) = listOf(
-        coordinate.left(), coordinate.right(), coordinate.up(), coordinate.down()
-    ).filter { contains(it) }
-
-    private fun Grid.contains(coordinate: Coordinate) =
-        coordinate.x in indices && coordinate.y in get(coordinate.x).indices
 
 }
 
-private fun Grid.toPicture() {
+private fun CharGrid.toPicture() {
     val pixels = mapOf(
         ' ' to listOf(
             listOf(0, 0, 0), listOf(0, 0, 0), listOf(0, 0, 0)
@@ -196,5 +166,4 @@ private fun Grid.toPicture() {
     createPBM(imageData)
 }
 
-fun Sequence<String>.toGrid(): Grid = map { line -> line.toList() }.toList()
 

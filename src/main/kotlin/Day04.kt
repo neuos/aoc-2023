@@ -37,5 +37,4 @@ object Day04 : Day(4) {
     }
 
     data class Card(val index: Int, val winCount: Int)
-
 }

@@ -6,12 +6,12 @@ object Day13 : Day(13) {
     private fun sumSymmetries(input: Sequence<String>, smudge: Boolean) =
         input.toList().chunkAt { it.isBlank() }.sumOf { valley ->
             val grid = valley.map { it.toList() }.toList()
-            val lines = grid.map { it.toNumber() }
+            val lines = grid.map { it.parseBinary('#') }
             val lineSym = lines.findSymmetry(smudge)
             if (lineSym != null) {
                 lineSym * 100
             } else {
-                val columns = (0..<grid[0].size).map { i -> grid.map { it[i] }.toNumber() }
+                val columns = (0..<grid[0].size).map { i -> grid.map { it[i] }.parseBinary('#') }
                 val columnSym = columns.findSymmetry(smudge)
                 columnSym ?: 0
             }
@@ -57,21 +57,6 @@ object Day13 : Day(13) {
             l == r -> null
             smudgeAvailable -> null
             else -> l
-        }
-    }
-
-
-    private fun oneBitDiff(a: Long, b: Long): Boolean {
-        fun oneBitSet(n: Long) = n != 0L && (n and n - 1) == 0L
-        val diff = a xor b
-        return oneBitSet(diff)
-    }
-
-    private fun List<Char>.toNumber(): Long {
-        return mapIndexed { index, c ->
-            if (c == '#') 1L shl index else 0L
-        }.reduce { acc, l ->
-            acc or l
         }
     }
 }
