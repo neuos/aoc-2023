@@ -1,5 +1,5 @@
 object Day14 : Day(14) {
-    override val expected = DayResult(136, 109596, 64, "TODO")
+    override val expected = DayResult(136, 109596, null /*64*/, null)
     override fun solvePart1(input: Sequence<String>) = input.map { it.toList() }.toList().rotateLeft().map {
         tilt(it)
     }.sumOf {
