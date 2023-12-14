@@ -1,7 +1,7 @@
 import java.io.FileWriter
 import kotlin.math.ceil
 
-private typealias Grid = List<List<Char>>
+typealias Grid = List<List<Char>>
 
 object Day10 : Day(10) {
     override val expected = DayResult(4, 6870, 10, 287)
@@ -91,7 +91,6 @@ object Day10 : Day(10) {
         error("Case not covered for $a - $start - $b")
     }
 
-    private fun Sequence<String>.toGrid(): Grid = map { line -> line.toCharArray().toList() }.toList()
 
     private fun Grid.areConnected(start: Coordinate, next: Coordinate) = when {
         start.isAboveOf(next) -> this[next] in setOf('|', 'L', 'J', 'S')
@@ -196,4 +195,6 @@ private fun Grid.toPicture() {
     }
     createPBM(imageData)
 }
+
+fun Sequence<String>.toGrid(): Grid = map { line -> line.toList() }.toList()
 
