@@ -1,3 +1,6 @@
+import util.CachedRecursion
+import util.repeat
+
 object Day12 : Day(12) {
     override val expected = DayResult(21L, 8270L, 525152L, 204640299929836L)
     override fun solvePart1(input: Sequence<String>) = input.sumOf { line ->

@@ -1,7 +1,8 @@
-import RangeExtensions.length
-import RangeExtensions.overlap
-import RangeExtensions.overlaps
-import RangeExtensions.without
+import util.RangeExtensions.length
+import util.RangeExtensions.overlap
+import util.RangeExtensions.overlaps
+import util.RangeExtensions.without
+import util.chunkAt
 
 object Day05 : Day(5) {
     override val expected = DayResult(35L, 324724204L, 46L, 104070862L)

@@ -1,3 +1,7 @@
+import util.Coordinate
+import util.manhattanDistance
+import util.pairs
+
 private const val GALAXY = '#'
 
 object Day11 : Day(11) {

@@ -1,3 +1,7 @@
+import util.chunkAt
+import util.oneBitDiff
+import util.parseBinary
+
 object Day13 : Day(13) {
     override val expected = DayResult(405, 27742, 400, 32728)
     override fun solvePart1(input: Sequence<String>) = sumSymmetries(input, false)

@@ -1,9 +1,14 @@
+import util.Coordinate
+import util.toGrid
+import util.combine
+import util.get
+
 object Day03 : Day(3) {
     override val expected = DayResult(4361, 539433, 467835, 75847567)
 
     override fun solvePart1(input: Sequence<String>): Int {
         val lines = input.toList()
-        val grid = lines.charGrid()
+        val grid = lines.toGrid()
         return lines.flatMapIndexed { row, rowString ->
             rowString.findNumbers().filter { (_, range) ->
                 grid.adjacent(row, range).any { it.isSymbol() }
@@ -13,7 +18,7 @@ object Day03 : Day(3) {
 
     override fun solvePart2(input: Sequence<String>): Any {
         val lines = input.toList()
-        val grid = lines.charGrid()
+        val grid = lines.toGrid()
         return lines.flatMapIndexed { row, rowString ->
             rowString.findNumbers().map { (num, range) ->
                 grid.adjacentIndices(row, range).filter {

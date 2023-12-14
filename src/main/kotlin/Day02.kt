@@ -1,3 +1,6 @@
+import util.combine
+import kotlin.math.max
+
 private data class Game(val id: Int, val rounds: List<Round>)
 private typealias Color = String
 private typealias Round = Map<Color, Int>
@@ -18,12 +21,10 @@ object Day02 : Day(2) {
         }
     }
 
-    override fun solvePart2(input: Sequence<String>) = input.parseGames().map { game ->
+    override fun solvePart2(input: Sequence<String>) = input.parseGames().sumOf { game ->
         // find the maximum amount of cubes for each color
-        game.rounds.reduce { acc, round ->
-            acc.mergeIf(round) { current, new -> current < new }
-        }.values.reduce { a, b -> a * b }
-    }.sum()
+        game.rounds.reduce { acc, round -> acc.combine(round, ::max) }.values.reduce(Int::times)
+    }
 
 
     private fun Sequence<String>.parseGames(): Sequence<Game> =
@@ -37,14 +38,5 @@ object Day02 : Day(2) {
             }
             Game(gameId, rounds)
         }
-}
-
-private fun <K, V> Map<K, V>.mergeIf(other: Map<K, V>, condition: (current: V, new: V) -> Boolean): Map<K, V> {
-    // merge both maps, values from this map are used if they are in both maps
-    val combined = other + this
-    // for all values in other that are different, the condition is checked
-    val overrides = other.filter { (key, value) -> combined[key] != value && condition(this[key]!!, value) }
-    // return the combined map with the overrides
-    return combined + overrides
 }
 

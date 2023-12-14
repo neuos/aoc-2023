@@ -1,3 +1,6 @@
+import util.allEquals
+import util.leastCommonMultiple
+
 object Day08 : Day(8) {
     override val expected = DayResult(2, 13939, 6L, 8906539031197L)
     override fun solvePart1(input: Sequence<String>): Any {

@@ -1,6 +1,6 @@
-import kotlin.math.ceil
-import kotlin.math.floor
-import kotlin.math.sqrt
+import util.nextDownInt
+import util.nextUpInt
+import util.solveQuadratic
 
 object Day06 : Day(6) {
     override val expected = DayResult(288, 316800, 71503, 45647654)

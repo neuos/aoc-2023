@@ -1,0 +1,38 @@
+package util
+
+import kotlin.math.abs
+
+data class Coordinate(val x: Long, val y: Long) : Comparable<Coordinate> {
+    constructor(x: Int, y: Int) : this(x.toLong(), y.toLong())
+
+    override fun compareTo(other: Coordinate) = compareValuesBy(this, other, Coordinate::x, Coordinate::y)
+    override fun toString() = "($x, $y)"
+    fun isAboveOf(other: Coordinate) = equals(other.up())
+    fun isBelowOf(other: Coordinate) = equals(other.down())
+    fun isLeftOf(other: Coordinate) = equals(other.left())
+    fun isRightOf(other: Coordinate) = equals(other.right())
+
+    fun up() = copy(x = x - 1)
+    fun down() = copy(x = x + 1)
+    fun left() = copy(y = y - 1)
+    fun right() = copy(y = y + 1)
+}
+
+operator fun <T> Grid<T>.get(other: Coordinate) = get(other.x.toInt())[other.y.toInt()]
+
+fun <T> Grid<T>.coordinates(): Sequence<Coordinate> = sequence {
+    for (x in indices) {
+        for (y in get(x).indices) {
+            yield(Coordinate(x, y))
+        }
+    }
+}
+
+fun <T> Grid<T>.adjacent(coordinate: Coordinate) = listOf(
+    coordinate.left(), coordinate.right(), coordinate.up(), coordinate.down()
+).filter { contains(it) }
+
+fun <T> Grid<T>.contains(coordinate: Coordinate) =
+    coordinate.x in indices && coordinate.y in get(coordinate.x.toInt()).indices
+
+fun manhattanDistance(a: Coordinate, b: Coordinate) = abs(a.x - b.x) + abs(a.y - b.y)

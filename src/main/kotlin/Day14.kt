@@ -1,3 +1,8 @@
+import util.CharGrid
+import util.rotateAnticlockwise
+import util.rotateClockwise
+import util.toGrid
+
 object Day14 : Day(14) {
     override val expected = DayResult(136, 109596, 64, 96105)
     override fun solvePart1(input: Sequence<String>) = input.toGrid().rotateAnticlockwise().tiltGridLeft().weight()
