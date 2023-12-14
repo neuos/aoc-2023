@@ -1,9 +1,21 @@
 object Day14 : Day(14) {
-    override val expected = DayResult(136, "TODO", "TODO", "TODO")
-    override fun solvePart1(input: Sequence<String>): Any {
-        return input.map { it.toList() }.toList().transposed().map {
-            tilt(it)
-        }.sumOf {
+    override val expected = DayResult(136, 109596, 64, "TODO")
+    override fun solvePart1(input: Sequence<String>) = input.map { it.toList() }.toList().rotateLeft().map {
+        tilt(it)
+    }.sumOf {
+        weight(it)
+    }
+
+    override fun solvePart2(input: Sequence<String>): Any {
+        var grid = input.map { it.toList() }.toList().rotateLeft()
+
+        (0..<(4*1000000000L)).forEach { _ ->
+            grid = grid.map {
+                tilt(it)
+            }.rotateRight()
+        }
+
+        return grid.sumOf {
             weight(it)
         }
     }
@@ -13,28 +25,35 @@ object Day14 : Day(14) {
     }.sum()
 
     private fun tilt(line: List<Char>): List<Char> {
-        val joinToString = line.joinToString("")
-//        println(joinToString)
-        val split = joinToString.split("#")
-//        println(split)
-        return split.joinToString("#") {
+        return line.joinToString("").split("#").joinToString("#") {
             it.toList().sortedDescending().joinToString("")
         }.toList()
     }
 
-    override fun solvePart2(input: Sequence<String>): Any {
-        return 0
+
+    private fun <E> List<List<E>>.rotateLeft(): List<List<E>> {
+        val result = mutableListOf<List<E>>()
+        for (i in this.indices) {
+            val row = mutableListOf<E>()
+            for (j in this.indices) {
+                row.add(this[j][i])
+            }
+            result.add(row)
+        }
+        return result.reversed()
+    }
+
+
+    private fun <E> List<List<E>>.rotateRight(): List<List<E>> {
+        val result = mutableListOf<List<E>>()
+        for (i in this.indices) {
+            val row = mutableListOf<E>()
+            for (j in this.indices) {
+                row.add(this[j][i])
+            }
+            result.add(row.reversed())
+        }
+        return result
     }
 }
 
-private fun <E> List<List<E>>.transposed(): List<List<E>> {
-    val result = mutableListOf<List<E>>()
-    for (i in this.indices) {
-        val row = mutableListOf<E>()
-        for (j in this.indices) {
-            row.add(this[j][i])
-        }
-        result.add(row)
-    }
-    return result
-}
