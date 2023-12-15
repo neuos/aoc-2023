@@ -1,7 +1,7 @@
 import util.Coordinate
-import util.toGrid
 import util.combine
 import util.get
+import util.toGrid
 
 object Day03 : Day(3) {
     override val expected = DayResult(4361, 539433, 467835, 75847567)

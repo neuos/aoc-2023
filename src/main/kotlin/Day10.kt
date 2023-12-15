@@ -100,8 +100,6 @@ object Day10 : Day(10) {
     }
 
 
-
-
 }
 
 private fun CharGrid.toPicture() {
