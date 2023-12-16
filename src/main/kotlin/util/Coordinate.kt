@@ -32,7 +32,7 @@ fun <T> Grid<T>.adjacent(coordinate: Coordinate) = listOf(
     coordinate.left(), coordinate.right(), coordinate.up(), coordinate.down()
 ).filter { contains(it) }
 
-fun <T> Grid<T>.contains(coordinate: Coordinate) =
+operator fun <T> Grid<T>.contains(coordinate: Coordinate) =
     coordinate.x in indices && coordinate.y in get(coordinate.x.toInt()).indices
 
 fun manhattanDistance(a: Coordinate, b: Coordinate) = abs(a.x - b.x) + abs(a.y - b.y)
