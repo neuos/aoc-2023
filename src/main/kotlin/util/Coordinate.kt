@@ -36,3 +36,15 @@ operator fun <T> Grid<T>.contains(coordinate: Coordinate) =
     coordinate.x in indices && coordinate.y in get(coordinate.x.toInt()).indices
 
 fun manhattanDistance(a: Coordinate, b: Coordinate) = abs(a.x - b.x) + abs(a.y - b.y)
+
+
+enum class Direction {
+    UP, DOWN, LEFT, RIGHT
+}
+
+operator fun Coordinate.plus(direction: Direction) = when (direction) {
+    Direction.UP -> up()
+    Direction.DOWN -> down()
+    Direction.LEFT -> left()
+    Direction.RIGHT -> right()
+}

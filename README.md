@@ -19,3 +19,4 @@ Solved Challenges:
 - [Day 13](src/main/kotlin/Day13.kt) ⭐⭐️
 - [Day 14](src/main/kotlin/Day14.kt) ⭐⭐
 - [Day 15](src/main/kotlin/Day15.kt) ⭐⭐
+- [Day 16](src/main/kotlin/Day16.kt) ⭐⭐

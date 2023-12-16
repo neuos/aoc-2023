@@ -1,16 +1,8 @@
-import Day16.Direction.*
 import util.*
+import util.Direction.*
 
 object Day16 : Day(16) {
-    enum class Direction {
-        UP, DOWN, LEFT, RIGHT
-    }
-
-    data class Beam(val pos: Coordinate, val direction: Direction){
-        override fun toString() = "$pos $direction"
-    }
-
-    override val expected = DayResult(46, "TODO", "TODO", "TODO")
+    override val expected = DayResult(46, 7608, 51, 8221)
     override fun solvePart1(input: Sequence<String>): Int {
         val grid: CharGrid = input.filter { it.isNotEmpty() }.toGrid()
         val start = Beam(Coordinate(0, -1), RIGHT)
@@ -19,20 +11,16 @@ object Day16 : Day(16) {
 
     override fun solvePart2(input: Sequence<String>): Int {
         val grid: CharGrid = input.filter { it.isNotEmpty() }.toGrid()
-        val startsLeft = grid.indices.map { i -> Beam(Coordinate(i, -1), RIGHT) }
-        val startsRight = grid.indices.map { i -> Beam(Coordinate(i, grid[i].size), LEFT) }
-        val startsTop = grid[0].indices.map { i -> Beam(Coordinate(-1, i), DOWN) }
-        val startsBottom = grid[0].indices.map { i -> Beam(Coordinate(grid.size, i), UP) }
-        val starts = startsLeft + startsRight + startsTop + startsBottom
-        return starts.maxOf { energize(grid, it) }
+        return grid.outerEdges().maxOf { start -> energize(grid, start) }
     }
 
-
+    private data class Beam(val pos: Coordinate, val direction: Direction) {
+        override fun toString() = "$pos $direction"
+    }
 
     private fun energize(grid: CharGrid, start: Beam): Int {
         val visited = mutableSetOf<Beam>()
         fun recurse(beam: Beam) {
-    //            println(beam)
             if (beam in visited) return
             visited += beam
             val next = beam.step(grid)
@@ -40,17 +28,10 @@ object Day16 : Day(16) {
         }
         recurse(start)
         return (visited - start).map { it.pos }.toSet().size
-
     }
 
-
     private fun Beam.step(grid: CharGrid): List<Beam> {
-        val nextPos = when (direction) {
-            UP -> pos.up()
-            DOWN -> pos.down()
-            LEFT -> pos.left()
-            RIGHT -> pos.right()
-        }
+        val nextPos = pos + direction
 
         if (nextPos !in grid) return emptyList()
 
@@ -82,6 +63,16 @@ object Day16 : Day(16) {
 
             else -> error("Invalid character: ${grid[nextPos]}")
         }
+    }
+
+    private fun CharGrid.outerEdges(): List<Beam> {
+        val horizontal = indices.flatMap { row ->
+            listOf(Beam(Coordinate(row, -1), RIGHT), Beam(Coordinate(row, first().size), LEFT))
+        }
+        val vertical = first().indices.flatMap { column ->
+            listOf(Beam(Coordinate(-1, column), DOWN), Beam(Coordinate(size, column), UP))
+        }
+        return horizontal + vertical
     }
 }
 
