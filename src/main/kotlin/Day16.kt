@@ -11,30 +11,38 @@ object Day16 : Day(16) {
     }
 
     override val expected = DayResult(46, "TODO", "TODO", "TODO")
-    override fun solvePart1(input: Sequence<String>): Any {
+    override fun solvePart1(input: Sequence<String>): Int {
         val grid: CharGrid = input.filter { it.isNotEmpty() }.toGrid()
-
-        val energized = energize(grid)
-        return energized.size
+        val start = Beam(Coordinate(0, -1), RIGHT)
+        return energize(grid, start)
     }
 
-    private fun energize(grid: CharGrid): Set<Coordinate> {
-        val start = Beam(Coordinate(0, -1), RIGHT)
+    override fun solvePart2(input: Sequence<String>): Int {
+        val grid: CharGrid = input.filter { it.isNotEmpty() }.toGrid()
+        val startsLeft = grid.indices.map { i -> Beam(Coordinate(i, -1), RIGHT) }
+        val startsRight = grid.indices.map { i -> Beam(Coordinate(i, grid[i].size), LEFT) }
+        val startsTop = grid[0].indices.map { i -> Beam(Coordinate(-1, i), DOWN) }
+        val startsBottom = grid[0].indices.map { i -> Beam(Coordinate(grid.size, i), UP) }
+        val starts = startsLeft + startsRight + startsTop + startsBottom
+        return starts.maxOf { energize(grid, it) }
+    }
+
+
+
+    private fun energize(grid: CharGrid, start: Beam): Int {
         val visited = mutableSetOf<Beam>()
         fun recurse(beam: Beam) {
-            println(beam)
+    //            println(beam)
             if (beam in visited) return
             visited += beam
             val next = beam.step(grid)
             next.forEach { recurse(it) }
         }
         recurse(start)
-        return (visited-start).map { it.pos }.toSet()
+        return (visited - start).map { it.pos }.toSet().size
+
     }
 
-    override fun solvePart2(input: Sequence<String>): Any {
-        return 0
-    }
 
     private fun Beam.step(grid: CharGrid): List<Beam> {
         val nextPos = when (direction) {
