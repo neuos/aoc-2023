@@ -18,7 +18,7 @@ data class Coordinate(val x: Long, val y: Long) : Comparable<Coordinate> {
     fun right() = copy(y = y + 1)
 }
 
-operator fun <T> Grid<T>.get(other: Coordinate) = get(other.x.toInt())[other.y.toInt()]
+operator fun <T> Grid<T>.get(at: Coordinate) = get(at.x.toInt())[at.y.toInt()]
 
 fun <T> Grid<T>.coordinates(): Sequence<Coordinate> = sequence {
     for (x in indices) {
@@ -39,7 +39,33 @@ fun manhattanDistance(a: Coordinate, b: Coordinate) = abs(a.x - b.x) + abs(a.y -
 
 
 enum class Direction {
-    UP, DOWN, LEFT, RIGHT
+    UP, DOWN, LEFT, RIGHT;
+
+    val opposite: Direction
+        get() = when (this) {
+            UP -> DOWN
+            DOWN -> UP
+            LEFT -> RIGHT
+            RIGHT -> LEFT
+        }
+
+    fun relative(other: Direction) = when (other) {
+        UP -> this
+        DOWN -> opposite
+        LEFT -> when (this) {
+            UP -> LEFT
+            DOWN -> RIGHT
+            LEFT -> DOWN
+            RIGHT -> UP
+        }
+
+        RIGHT -> when (this) {
+            UP -> RIGHT
+            DOWN -> LEFT
+            LEFT -> UP
+            RIGHT -> DOWN
+        }
+    }
 }
 
 operator fun Coordinate.plus(direction: Direction) = when (direction) {
