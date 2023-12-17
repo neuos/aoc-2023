@@ -18,18 +18,18 @@ fun <Node> findShortestPath(
     while (toVisit.isNotEmpty()) {
         val (currentNode, currentScore) = toVisit.remove()
         if (isEnd(currentNode)) {
-            val path = reconstructPath(currentNode, previous)
-            return path
+            return reconstructPath(currentNode, previous)
         }
 
-        val nextPoints = next(currentNode).filter {
+        next(currentNode).filter {
             it !in previous
-        }.map { NodeCost(it, currentScore + cost(currentNode, it)) }
-
-        toVisit.addAll(nextPoints)
-        previous.putAll(nextPoints.associate { it.node to currentNode })
+        }.map {
+            NodeCost(it, currentScore + cost(currentNode, it))
+        }.forEach {
+            toVisit.add(it)
+            previous[it.node] = currentNode
+        }
     }
-
     return null
 }
 

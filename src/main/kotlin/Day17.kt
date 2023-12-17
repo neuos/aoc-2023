@@ -10,16 +10,16 @@ object Day17 : Day(17) {
         val start = bounds.topLeft
         val end = bounds.bottomRight
         val path = findShortestPath(
-            start = DirectedCoordinate(start, DirectedLine.empty),
-            isEnd = { it.coordinate == end && it.line.length >= minStraight },
+            start = DirectedCoordinate(start, 0, RIGHT),
+            isEnd = { it.coordinate == end && it.length >= minStraight },
             next = {
-                it.line.length.let { length ->
+                it.length.let { length ->
                     when {
                         length == 0 -> listOf(UP, DOWN, LEFT, RIGHT)
                         length < minStraight -> listOf(UP)
                         else -> listOf(LEFT, RIGHT, UP)
                     }.map { dir -> it.plusRelative(dir) }.filter { (coordinate, line) ->
-                        coordinate in this && line.length <= maxStraight
+                        coordinate in this && line <= maxStraight
                     }
                 }
             },
@@ -29,27 +29,16 @@ object Day17 : Day(17) {
         return path.drop(1).sumOf { this[it.coordinate] }
     }
 
-    data class DirectedCoordinate(val coordinate: Coordinate, val line: DirectedLine) {
-        override fun toString() = "$coordinate $line"
+    data class DirectedCoordinate(val coordinate: Coordinate, val length: Int, val direction: Direction) {
+        override fun toString() = "$coordinate $length $direction"
 
-        fun plusRelative(direction: Direction) = plus(line.direction.relative(direction))
-        private fun plus(direction: Direction) = DirectedCoordinate(coordinate + direction, line + direction)
-    }
-
-    data class DirectedLine(val length: Int, val direction: Direction) {
-
-        companion object {
-            val empty = DirectedLine(0, RIGHT)
+        fun plusRelative(relative: Direction): DirectedCoordinate {
+            val dir = this.direction.relative(relative)
+            val length = if (dir == this.direction) {
+                this.length + 1
+            } else 1
+            return DirectedCoordinate(coordinate + dir, length, dir)
         }
-
-        operator fun plus(direction: Direction) = if (direction == this.direction) {
-            copy(length = length + 1)
-        } else {
-            DirectedLine(1, direction)
-        }
-
-        override fun toString() = "$length $direction"
     }
-
 }
 
