@@ -21,3 +21,4 @@ Solved Challenges:
 - [Day 15](src/main/kotlin/Day15.kt) ⭐⭐
 - [Day 16](src/main/kotlin/Day16.kt) ⭐⭐
 - [Day 17](src/main/kotlin/Day17.kt) ⭐⭐
+- [Day 18](src/main/kotlin/Day18.kt) ⭐⭐
