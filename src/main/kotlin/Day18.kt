@@ -5,24 +5,38 @@ import util.adjacent
 import util.plus
 
 object Day18 : Day(18) {
-    override val expected = DayResult(62, 39039, "TODO", "TODO")
+    override val expected = DayResult(62, 39039, 952408144115L, "TODO")
 
-    data class Instruction(val direction: Direction, val length: Int, val color: String) {
+    data class Instruction(val direction: Direction, val length: Int) {
 
         companion object {
             fun parse(input: String): Instruction {
-                val (dir, len, col) = input.split(" ")
+                val (dir, len, _) = input.split(" ")
                 val direction = when (dir) {
-                    "U" -> UP
+                    "R" -> RIGHT
                     "D" -> DOWN
                     "L" -> LEFT
-                    "R" -> RIGHT
+                    "U" -> UP
                     else -> throw IllegalArgumentException("Unknown direction $dir")
                 }
                 val length = len.toInt()
-                return Instruction(direction, length, col)
+                return Instruction(direction, length)
+            }
+
+            fun parseHex(input: String): Instruction {
+                val hex = input.substringAfter('#').substringBefore(')')
+                val length = hex.substring(0, 4).toInt(16)
+                val direction = when (hex.last()) {
+                    '0' -> RIGHT
+                    '1' -> DOWN
+                    '2' -> LEFT
+                    '3' -> UP
+                    else -> throw IllegalArgumentException("Unknown direction in $hex")
+                }
+                return Instruction(direction, length)
             }
         }
+
         override fun toString(): String {
             return "$direction $length"
         }
@@ -44,63 +58,45 @@ object Day18 : Day(18) {
         }
     }
 
-    data class DirectionalCoordinate(val direction: Direction, val coordinate: Coordinate) {}
-
-    override fun solvePart1(input: Sequence<String>): Any {
+    override fun solvePart1(input: Sequence<String>): Int {
         val instructions = input.map(Instruction.Companion::parse).toList()
-
-
-        val rawCoordinates = buildList<Coordinate> {
+        val border = buildList<Coordinate> {
             add(Coordinate(0, 0))
             instructions.forEach {
                 val last = last()
                 val next = last + it
-//                println("instruction: $it, last: $last, next: $next")
                 addAll(next)
             }
         }
-
-        val firstInner = rawCoordinates.first().let { Coordinate(it.vertical + 1, it.horizontal + 1) }
-
-        val minWidth = rawCoordinates.minOf { it.horizontal }.toInt()
-        val minHeight = rawCoordinates.minOf { it.vertical }.toInt()
-        val coordinates = rawCoordinates.map { Coordinate(it.vertical - minHeight, it.horizontal - minWidth) }
-        val maxWidth = coordinates.maxOf { it.horizontal }.toInt()
-        val maxHeight = coordinates.maxOf { it.vertical }.toInt()
-        println("maxWidth: $maxWidth, maxHeight: $maxHeight")
-        val grid = List(maxHeight + 1) { MutableList(maxWidth + 1) { false } }
-
-
-        val count = floodFill(coordinates)
+        val count = floodFill(border.toSet())
         println("count: $count")
-
-
-        coordinates.forEach { coord ->
-            grid[coord.vertical.toInt()][coord.horizontal.toInt()] = true
-        }
-
-        grid.forEach { row ->
-            row.forEach { cell ->
-                print(if (cell) '#' else ' ')
-            }
-            println()
-        }
-
         return count
     }
 
-    private fun floodFill(coordinates: List<Coordinate>): Int {
-        val firstInside = coordinates.min() + DOWN + RIGHT
+    private fun floodFill(border: Set<Coordinate>): Int {
+        val firstInside = border.min() + DOWN + RIGHT
         var next = listOf(firstInside)
         val counted = mutableSetOf(firstInside)
         while (next.isNotEmpty()) {
             counted += next
-            next = next.flatMap { it.adjacent().filter { it !in coordinates && it !in counted }}.distinct()
+            next = next.flatMap { it.adjacent().filter { it !in border && it !in counted } }.distinct()
         }
-        return counted.size + coordinates.distinct().size
+        return counted.size + border.size
     }
 
-    override fun solvePart2(input: Sequence<String>): Any {
-        return 0
+    override fun solvePart2(input: Sequence<String>): Long {
+        val instructions = input.map(Instruction.Companion::parseHex).toList()
+        val coordinates = buildList<Coordinate> {
+            add(Coordinate(0, 0))
+            instructions.forEach {
+                val last = last()
+                val next = last + it
+                addAll(next)
+            }
+        }
+        val count = floodFill(coordinates.toSet())
+        println("count: $count")
+        return count.toLong()
+
     }
 }

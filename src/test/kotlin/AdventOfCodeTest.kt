@@ -9,7 +9,7 @@ class AdventOfCodeTest {
         private val days = Day::class.sealedSubclasses.map { it.objectInstance!! }.sorted()
         private fun testcase(name: String, expected: Any?, function: () -> Any) = DynamicTest.dynamicTest(name) {
             Assumptions.assumeFalse { expected == null }
-            assertEquals(expected, function())
+            assertEquals(expected.toString(), function().toString())
         }
     }
 
